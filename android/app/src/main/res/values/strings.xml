@@ -2,6 +2,6 @@
 <resources>
     <string name="app_name">Photo Gallery Cap Ng</string>
     <string name="title_activity_main">Photo Gallery Cap Ng</string>
-    <string name="package_name">io.ionic.demo.pg.cap.ng</string>
-    <string name="custom_url_scheme">io.ionic.demo.pg.cap.ng</string>
+    <string name="package_name">io.potholedef.demo</string>
+    <string name="custom_url_scheme">io.potholedef.demo</string>
 </resources>

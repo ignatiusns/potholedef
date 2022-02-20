@@ -1,4 +1,4 @@
-package io.ionic.demo.pg.cap.ng;
+package io.potholedef.demo;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -1,6 +1,6 @@
 import { CapacitorConfig } from '@capacitor/cli';
 const config: CapacitorConfig = {
-  appId: "io.ionic.demo.pg.cap.ng",
+  appId: "io.potholedef.demo",
   appName: "Photo Gallery Cap Ng",
   bundledWebRuntime: false,
   npmClient: "npm",

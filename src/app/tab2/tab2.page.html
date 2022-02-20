@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Photo Gallery
+      Pothole Submission
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,21 +9,52 @@
 <ion-content>
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Photo Gallery</ion-title>
+      <ion-title size="medium">Pothole Submission</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <ion-grid>
     <ion-row>
-    <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
-      <ion-img [src]="photo.webviewPath" (click)="showActionSheet(photo, position)"></ion-img>
-    </ion-col>
+      <ion-col size="6">
+        <ion-item>
+          <span class="text">Capture the picture of pothole</span>
+        </ion-item>        
+      </ion-col>
+      <ion-col size="3">
+        <ion-fab-button (click)="photoService.addNewToGallery()">
+          <ion-icon name="camera"></ion-icon>
+        </ion-fab-button>      
+      </ion-col>      
+      <ion-col size="3">
+        <ion-fab-button (click)="ReportIssue()">
+          <ion-icon name="checkmark-outline"></ion-icon>
+        </ion-fab-button>
+      </ion-col>            
+    </ion-row>
+    <ion-row class="imagecls">
+      <ion-col size="6">
+        <ion-slides [options]="slideOptsOne">
+          <ion-slide *ngFor="let photo of photoService.photos; index as position">
+            <ion-img class="imgcls" [src]="photo.webviewPath" (click)="showActionSheet(photo, position)"></ion-img>
+          </ion-slide>
+        </ion-slides>
+      </ion-col>
+      <ion-col size="6">
+        <ion-item>
+          <span>Latitude: {{coordinates.coords.latitude.toFixed(2)}}</span>
+        </ion-item>
+        <ion-item>
+          <span>Longitude: {{coordinates.coords.longitude.toFixed(2)}}</span>
+        </ion-item>        
+        <ion-item>
+          <span>Pothole Confidence: 90%</span>
+        </ion-item>
+      </ion-col>
+    </ion-row>
+    <ion-row>
+      <ion-col size="12">
+        <google-map class="mapcls" [options]="options"></google-map>
+      </ion-col>
     </ion-row>
   </ion-grid>
-
-  <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-    <ion-fab-button (click)="photoService.addNewToGallery()">
-      <ion-icon name="camera"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
 </ion-content>

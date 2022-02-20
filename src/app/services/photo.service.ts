@@ -1,10 +1,12 @@
 import { Injectable } from '@angular/core';
+import { GetDownloadURLPipeModule } from '@angular/fire/compat/storage';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
 import { Capacitor } from '@capacitor/core';
 import { Directory, Filesystem } from '@capacitor/filesystem';
 import { Storage } from '@capacitor/storage';
+import { async } from '@firebase/util';
 import { Platform } from '@ionic/angular';
-
+import { StorageService } from './storage.service';
 
 
 @Injectable({
@@ -14,7 +16,7 @@ export class PhotoService {
   public photos: UserPhoto[] = [];
   private PHOTO_STORAGE: string = 'photos';
 
-  constructor(private platform: Platform) {}
+  constructor(private platform: Platform, public storageSvc: StorageService) {}
 
   public async loadSaved() {
     // Retrieve cached photo array data
@@ -26,6 +28,7 @@ export class PhotoService {
       // Display the photo by reading into base64 format
       for (let photo of this.photos) {
         // Read each saved photo's data from the Filesystem
+        
         const readFile = await Filesystem.readFile({
           path: photo.filepath,
           directory: Directory.Data,
@@ -55,7 +58,7 @@ export class PhotoService {
     });
 
     const savedImageFile = await this.savePicture(capturedPhoto);
-
+    await this.uploadPicture(capturedPhoto);
     // Add new photo to Photos array
     this.photos.unshift(savedImageFile);
 
@@ -96,6 +99,23 @@ export class PhotoService {
     }
   }
 
+  // Upload picture by gettomg reference data and the filesystem
+  public async uploadPicture(cameraPhoto: Photo) {
+    // Update photos array cache by overwriting the existing photo array
+    const blob = await this.readAsBlob(cameraPhoto);
+    const fileName =  new Date().getTime() + '.jpeg';
+    const file = new File([blob], fileName, {
+      lastModified:  new Date().getTime(),
+      type: blob.type,
+    });
+
+    // upload photo
+    const uploadmeta = await this.storageSvc.uploadFileAndGetMetadata('potholes', file);
+    uploadmeta.downloadUrl$.subscribe(durl => {
+      console.log("Upload Metadata - " + durl);
+    });
+  }
+
   // Read camera photo into base64 format based on the platform the app is running on
   private async readAsBase64(cameraPhoto: Photo) {
     // "hybrid" will detect Cordova or Capacitor
@@ -115,11 +135,27 @@ export class PhotoService {
     }
   }
 
+  // Read camera photo into base64 format based on the platform the app is running on
+  private async readAsBlob(cameraPhoto: Photo) {
+    // "hybrid" will detect Cordova or Capacitor
+    if (this.platform.is('hybrid')) {
+      // Read the file into base64 format
+      const response = await fetch (cameraPhoto.webPath!);
+      const blob = await response.blob();
+      return blob;
+    } else {
+      // Fetch the photo, read as a blob, then convert to base64 format
+      const response = await fetch(cameraPhoto.webPath!);
+      const blob = await response.blob();
+      return blob;
+    }
+  }  
+
   // Delete picture by removing it from reference data and the filesystem
   public async deletePicture(photo: UserPhoto, position: number) {
     // Remove this photo from the Photos reference data array
     this.photos.splice(position, 1);
-
+    
     // Update photos array cache by overwriting the existing photo array
     Storage.set({
       key: this.PHOTO_STORAGE,
