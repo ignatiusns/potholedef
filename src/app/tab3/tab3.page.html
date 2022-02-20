@@ -1,7 +1,7 @@
 <ion-header>
   <ion-toolbar>
     <ion-title>
-      Tab 3
+      Pothole List
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -13,5 +13,17 @@
     </ion-toolbar>
   </ion-header>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <ion-card  *ngFor="let pothole of potholes; index as position">
+    <ion-card-header color="light">
+      <ion-item color="light" lines="none">
+          <img [src]=pothole.url>
+      </ion-item>
+    </ion-card-header>
+    <ion-card-content class="ion-margin-top">
+      <p>Latitude: {{ pothole.latitude }}</p>
+      <p>Longitude: {{ pothole.longitude }}</p>
+      <p>Pothole Prediction: {{ pothole.potholeprediction }}</p>      
+    </ion-card-content>
+  </ion-card>
+  
 </ion-content>

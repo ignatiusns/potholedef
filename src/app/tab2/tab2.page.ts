@@ -2,6 +2,9 @@ import { Component } from '@angular/core';
 import { ActionSheetController } from '@ionic/angular';
 import { UserPhoto, PhotoService } from '../services/photo.service';
 import { Geolocation } from '@capacitor/geolocation'
+import { PotholeService } from '../services/potholes.service';
+import { Pothole } from '../models/pothole';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-tab2',
@@ -10,12 +13,18 @@ import { Geolocation } from '@capacitor/geolocation'
 })
 export class Tab2Page {
 
-  constructor(public photoService: PhotoService, public actionSheetController: ActionSheetController) {}
+  constructor(public photoService: PhotoService, 
+    public potholeService: PotholeService,
+    public navCtrl: NavController,
+    public actionSheetController: ActionSheetController) {}
+  
   public options: google.maps.MapOptions = {
     center: {lat: 38.8951 , lng: -77.0364},
     zoom: 15
   };
   public coordinates: any;
+  public photoUrl: any;
+
   public slideOptsOne = {
     initialSlide: 0,
     slidesPerView: 1,
@@ -23,7 +32,7 @@ export class Tab2Page {
   };  
 
   async ngOnInit() {
-    await this.photoService.loadSaved();
+    await this.photoService.clearStorage();
     this.coordinates = await Geolocation.getCurrentPosition();
     this.options = {
       center: {lat: this.coordinates.coords.latitude, lng: this.coordinates.coords.longitude},
@@ -32,8 +41,17 @@ export class Tab2Page {
     console.log("the coordinates are " + this.coordinates.coords.latitude + " - " + this.coordinates.coords.longitude);
   }
 
-  public ReportIssue() {
+  public async ReportIssue() {
+    const pothole: Pothole = {
+      url: this.photoUrl,
+      latitude: this.coordinates.coords.latitude,
+      longitude: this.coordinates.coords.longitude,
+      potholeprediction: 90
+    }
+    console.log(this.photoUrl);
+    await this.potholeService.savePothole(pothole);
 
+    this.navCtrl.navigateForward('tabs/tab3');
   }
 
   public async showActionSheet(photo: UserPhoto, position: number) {
@@ -57,5 +75,12 @@ export class Tab2Page {
       }]
     });
     await actionSheet.present();
+  }
+
+  public async addNewToGallery() {
+    const uploadmeta = await this.photoService.addNewToGallery();
+    uploadmeta.downloadUrl$.subscribe(durl => {
+      this.photoUrl = durl;
+    });  
   }
 }

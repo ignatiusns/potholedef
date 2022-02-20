@@ -53,12 +53,12 @@ export class PhotoService {
     // Take a photo
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri, // file-based data; provides best performance
-      source: CameraSource.Camera, // automatically take a new photo with the camera
+      //source: CameraSource.Camera, // automatically take a new photo with the camera
       quality: 100, // highest quality (0 to 100)
     });
 
     const savedImageFile = await this.savePicture(capturedPhoto);
-    await this.uploadPicture(capturedPhoto);
+    const uploadMeta = await this.uploadPicture(capturedPhoto);
     // Add new photo to Photos array
     this.photos.unshift(savedImageFile);
 
@@ -67,6 +67,8 @@ export class PhotoService {
       key: this.PHOTO_STORAGE,
       value: JSON.stringify(this.photos),
     });
+
+    return uploadMeta;
   }
 
   // Save picture to file on device
@@ -111,9 +113,7 @@ export class PhotoService {
 
     // upload photo
     const uploadmeta = await this.storageSvc.uploadFileAndGetMetadata('potholes', file);
-    uploadmeta.downloadUrl$.subscribe(durl => {
-      console.log("Upload Metadata - " + durl);
-    });
+    return uploadmeta;
   }
 
   // Read camera photo into base64 format based on the platform the app is running on
@@ -150,6 +150,15 @@ export class PhotoService {
       return blob;
     }
   }  
+
+  // Delete picture by removing it from reference data and the filesystem
+  public async clearStorage() {
+    // Update photos array cache by overwriting the existing photo array
+    Storage.set({
+      key: this.PHOTO_STORAGE,
+      value: JSON.stringify(this.photos),
+    });
+  }
 
   // Delete picture by removing it from reference data and the filesystem
   public async deletePicture(photo: UserPhoto, position: number) {
