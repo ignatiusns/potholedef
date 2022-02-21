@@ -54,7 +54,7 @@ export class PhotoService {
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri, // file-based data; provides best performance
       //source: CameraSource.Camera, // automatically take a new photo with the camera
-      quality: 100, // highest quality (0 to 100)
+      quality: 30, // highest quality (0 to 100)
     });
 
     const savedImageFile = await this.savePicture(capturedPhoto);
@@ -112,7 +112,8 @@ export class PhotoService {
     });
 
     // upload photo
-    const uploadmeta = await this.storageSvc.uploadFileAndGetMetadata('potholes', file);
+    const uploadmeta = this.storageSvc.uploadFileAndGetMetadata('potholes', file);
+
     return uploadmeta;
   }
 

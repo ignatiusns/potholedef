@@ -48,7 +48,7 @@ export class Tab2Page {
       longitude: this.coordinates.coords.longitude,
       potholeprediction: 90
     }
-    console.log(this.photoUrl);
+    console.log("Photo URL - " + this.photoUrl);
     await this.potholeService.savePothole(pothole);
 
     this.navCtrl.navigateForward('tabs/tab3');
@@ -79,8 +79,10 @@ export class Tab2Page {
 
   public async addNewToGallery() {
     const uploadmeta = await this.photoService.addNewToGallery();
+    console.log("after calling uploadmeta");
     uploadmeta.downloadUrl$.subscribe(durl => {
       this.photoUrl = durl;
+      console.log("sets the url - " + durl);      
     });  
   }
 }
