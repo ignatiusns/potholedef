@@ -5,6 +5,8 @@ import { Geolocation } from '@capacitor/geolocation'
 import { PotholeService } from '../services/potholes.service';
 import { Pothole } from '../models/pothole';
 import { NavController } from '@ionic/angular';
+import { PredictionAPIClient } from '@azure/cognitiveservices-customvision-prediction'
+import { ApiKeyCredentials } from '@azure/ms-rest-js'
 
 @Component({
   selector: 'app-tab2',
@@ -24,6 +26,7 @@ export class Tab2Page {
   };
   public coordinates: any;
   public photoUrl: any;
+  public probability: any;
 
   public slideOptsOne = {
     initialSlide: 0,
@@ -46,7 +49,7 @@ export class Tab2Page {
       url: this.photoUrl,
       latitude: this.coordinates.coords.latitude,
       longitude: this.coordinates.coords.longitude,
-      potholeprediction: 90
+      potholeprediction: this.probability
     }
     console.log("Photo URL - " + this.photoUrl);
     await this.potholeService.savePothole(pothole);
@@ -80,9 +83,56 @@ export class Tab2Page {
   public async addNewToGallery() {
     const uploadmeta = await this.photoService.addNewToGallery();
     console.log("after calling uploadmeta");
+    uploadmeta.uploadProgress$.subscribe(uplprogress => {
+      console.log("Upload progress - " + uplprogress);
+    })
+
     uploadmeta.downloadUrl$.subscribe(durl => {
       this.photoUrl = durl;
-      console.log("sets the url - " + durl);      
+      console.log("sets the url - " + durl);  
+      this.postForPrediction(durl);  
     });  
   }
+
+  async postForPrediction(imgurl: string) {
+    const customVisionPredictionKey = "2890a4d458b74286ac9d9912fecd3fbc";
+    const customVisionPredictionEndPoint = "https://potholeid.cognitiveservices.azure.com/customvision/v3.0/Prediction/0bb219d4-ed58-43ff-a5ed-82bb5112541a/detect/iterations/Iteration1/url";
+    const projectId = "0bb219d4-ed58-43ff-a5ed-82bb5112541a";
+
+    const credentials = new ApiKeyCredentials({ inHeader: {"Prediction-key": customVisionPredictionKey } });
+    const client = new PredictionAPIClient(credentials, customVisionPredictionEndPoint);
+
+    const imageURL = imgurl;
+
+    client
+      .classifyImageUrl(projectId, "Iteration1", { url: imageURL })
+      .then(result => {
+        console.log("The result is: ", JSON.stringify(result));
+        Math.max.apply(Math, result.predictions.map(function(o) { 
+          console.log("probability is", o.probability.toFixed(2));
+          this.probability = o.probability.toFixed(2);
+        }))
+      })
+      .catch(err => {
+        console.log("An error occurred:", JSON.stringify(err));
+      });
+
+    // const body = {"Url": imgurl};
+    // const httpOptions = {
+    //   headers: new HttpHeaders({
+    //     'Content-Type':  'application/json',
+    //     "Prediction-Key": '2890a4d458b74286ac9d9912fecd3fbc'
+    //   })
+    // };
+      
+    // this.http.post('https://potholeid.cognitiveservices.azure.com/customvision/v3.0/Prediction/0bb219d4-ed58-43ff-a5ed-82bb5112541a/detect/iterations/Iteration1/url', 
+    //     body, 
+    //     httpOptions).subscribe({next: data => {
+    //       console.log("response from http req - ", JSON.stringify(data));
+    //   }, 
+    //   error: error => {
+    //     console.error('There was an error!', JSON.stringify(error));
+    // }});
+  }      
+  
 }
