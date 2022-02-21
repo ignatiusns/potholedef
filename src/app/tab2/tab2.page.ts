@@ -52,6 +52,7 @@ export class Tab2Page {
       potholeprediction: this.probability
     }
     console.log("Photo URL - " + this.photoUrl);
+    console.log("Probability - " + this.probability);
     await this.potholeService.savePothole(pothole);
 
     this.navCtrl.navigateForward('tabs/tab3');
@@ -94,7 +95,7 @@ export class Tab2Page {
     });  
   }
 
-  async postForPrediction(imgurl: string) {
+  public postForPrediction(imgurl: string) {
     const customVisionPredictionKey = "2890a4d458b74286ac9d9912fecd3fbc";
     const customVisionPredictionEndPoint = "https://potholeid.cognitiveservices.azure.com/customvision/v3.0/Prediction/0bb219d4-ed58-43ff-a5ed-82bb5112541a/detect/iterations/Iteration1/url";
     const projectId = "0bb219d4-ed58-43ff-a5ed-82bb5112541a";
@@ -108,9 +109,9 @@ export class Tab2Page {
       .classifyImageUrl(projectId, "Iteration1", { url: imageURL })
       .then(result => {
         console.log("The result is: ", JSON.stringify(result));
-        Math.max.apply(Math, result.predictions.map(function(o) { 
+        this.probability = Math.max.apply(Math, result.predictions.map(function(o) { 
           console.log("probability is", o.probability.toFixed(2));
-          this.probability = o.probability.toFixed(2);
+          return o.probability.toFixed(2);
         }))
       })
       .catch(err => {
