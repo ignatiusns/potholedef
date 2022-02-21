@@ -116,23 +116,6 @@ export class Tab2Page {
       .catch(err => {
         console.log("An error occurred:", JSON.stringify(err));
       });
-
-    // const body = {"Url": imgurl};
-    // const httpOptions = {
-    //   headers: new HttpHeaders({
-    //     'Content-Type':  'application/json',
-    //     "Prediction-Key": '2890a4d458b74286ac9d9912fecd3fbc'
-    //   })
-    // };
-      
-    // this.http.post('https://potholeid.cognitiveservices.azure.com/customvision/v3.0/Prediction/0bb219d4-ed58-43ff-a5ed-82bb5112541a/detect/iterations/Iteration1/url', 
-    //     body, 
-    //     httpOptions).subscribe({next: data => {
-    //       console.log("response from http req - ", JSON.stringify(data));
-    //   }, 
-    //   error: error => {
-    //     console.error('There was an error!', JSON.stringify(error));
-    // }});
   }      
   
 }
